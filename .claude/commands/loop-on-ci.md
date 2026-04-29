@@ -8,7 +8,7 @@ argument-hint: "[pr-number]   # optional, defaults to the PR for the current bra
 
 You're going to drive a PR to a green, fully-resolved state. The user has shipped a branch and opened a PR; CodeRabbit and the CI workflows are doing their thing. Your job is to keep iterating — pull failures, fix them, push, and resolve review threads — until there is nothing left to fix.
 
-**Repo**: H3-Teamy (Next.js 16, Prisma, Vitest). Read `AGENTS.md` and `.cursor/rules/always.md` first — they encode the project's coding standards (Dutch UI strings, no inline `style` props, `try/catch` + `Sentry.captureException` everywhere, JSDoc ≥80% per `.coderabbit.yaml`, `vi.stubEnv` in tests, etc.). Apply them by default.
+**Project context**: Read `AGENTS.md` and `.cursor/rules/always.md` first — they encode the project's coding standards (e.g. UI-locale conventions, no inline `style` props, error-handling patterns, JSDoc threshold per `.coderabbit.yaml`, test runner conventions, etc.). Apply them by default.
 
 ## How the loop runs
 

@@ -13,6 +13,7 @@ A GitHub template repo that bootstraps a new project with the agent/AI-assisted-
 | `.cursor/settings.json` | Cursor preferences (e.g. `iterateOnLints`, plugin enables). |
 | `.cursor/hooks.ts` | Experimental Cursor hooks: blocks destructive shell commands; runs linters/formatters after edits. |
 | `.claude/commands/loop-on-ci.md` | Claude Code slash command that watches PR CI, fixes failures, addresses bot review feedback, and iterates until green. |
+| `.claude/commands/vercel-setup.md` | Claude Code slash command that bootstraps Vercel for a new repo: creates the project, links it to GitHub, sets production env vars (and asks about preview), then triggers the first deploy. |
 | `.husky/pre-commit` | Prettier on staged files → merge-conflict marker check → ESLint → `tsc --noEmit` → `vitest run`. |
 | `.husky/pre-push` | `npm run docs:check`. |
 | `.github/workflows/agentic-ci.yml` | Lint / typecheck / build / test verify pipeline. |
@@ -29,6 +30,7 @@ A GitHub template repo that bootstraps a new project with the agent/AI-assisted-
 3. Run `husky install` (or `npm run prepare`) once after first install so the hooks are wired into `.git/hooks/`.
 4. Configure CodeRabbit in your repo settings if you haven't already; the `.coderabbit.yaml` here will be picked up on first PR.
 5. Configure repo secrets the workflows need (e.g. `OPENAI_API_KEY` if `ai-review.yml` uses it; review each workflow before enabling).
+6. **If you're hosting on Vercel:** run the `/vercel-setup` slash command (or have an agent run it). It walks an agent through creating the Vercel project, linking the GitHub repo, setting production env vars, asking whether a preview environment is wanted, and triggering the first deploy. See `.claude/commands/vercel-setup.md`.
 
 ## Things this template intentionally does NOT include
 

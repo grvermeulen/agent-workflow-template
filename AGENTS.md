@@ -3,6 +3,7 @@
 - CodeRabbit docstring coverage is configured in `.coderabbit.yaml` (threshold **80%**); add JSDoc on exported `src/**/*.ts(x)` symbols and use CodeRabbit "Generate docstrings" when needed.
 - Use GitHub CLI for GitHub actions (PRs, checks, comments, merges) when possible.
 - Use the `loop-on-ci` workflow when asked: watch CI, inspect failures, apply focused fixes, and iterate until green. Voor **CodeRabbit** (en andere PR-bots zoals Cursor bot): na het verwerken van review-opmerkingen in code moeten de bijbehorende **GitHub-reviewthreads ook op resolved gezet worden** — dat hoort bij dezelfde CI/PR-ronde, niet als aparte stap later. Gebruik bijv. GraphQL `resolveReviewThread` met `gh api graphql` zodat de PR zichtbaar "af" is.
+- For a brand-new repo where Vercel hosting is in scope: run the `vercel-setup` slash command (`.claude/commands/vercel-setup.md`). It creates the Vercel project, links it to the GitHub repo, sets production env vars, asks whether a preview environment is wanted, and triggers the first deploy.
 - When syncing Vercel environment configuration, treat remote settings as source of truth and sync local values from remote.
 - Use the GitHub CLI when GitHub information is needed.
 - Follow the provided Sentry instrumentation patterns for Next.js projects when Sentry is in scope.
