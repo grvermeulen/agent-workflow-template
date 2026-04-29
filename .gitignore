@@ -1,0 +1,13 @@
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.env
+.env.*
+!.env.example
+.vercel/
+.claude/worktrees/
+.cursor/hooks/state/
+*.log
+.DS_Store
