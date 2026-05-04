@@ -13,6 +13,7 @@
 - Run the verification loop (build, typecheck, lint, test, security scan, diff review) before creating or updating PRs.
 - **Geen BugBot Pro**: gebruik de gratis stack — CodeRabbit op PRs, Agentic CI, GitHub Copilot-review (workflow), en `.cursor/rules` / `AGENTS.md` in Cursor.
 - **Vercel Rolling Releases**: niet gebruiken zonder Pro-plan; gewone production deploys blijven voldoende.
+- **Agent OS (spec-driven workflow)**: voor non-triviale changes eerst Plan Mode in, dan `/shape-spec` (`.claude/commands/agent-os/`). Dat schrijft `agent-os/specs/<datum-slug>/` met `plan.md`, `shape.md`, `standards.md`, `references.md` voordat er code wordt aangepast — Task 1 van elk plan persist altijd de docs. Aan het begin van een implementatie-taak: `/inject-standards` (auto-suggest of `api/response-format` etc.) om de relevante project-standards in context te laden. Project-specifieke conventies horen in `agent-os/standards/<area>/<file>.md` (kort, scanbaar, één concept per file); globale agent-rules blijven in `.cursor/rules/`. Bij overlap wint de project-specifieke standard.
 
 ## Learned Workspace Facts
 
@@ -31,3 +32,4 @@
 - Cache failures must never propagate to the caller — wrap in try/catch, log, continue.
 - Pre-commit hooks run Prettier, ESLint, `tsc --noEmit`, and the test runner (see `.husky/pre-commit`).
 - The `.cursor/rules/` directory contains agent-agnostic coding rules covering: security, API design, frontend/backend patterns, database migrations, verification loops, search-first workflow, code review, and de-slop cleanup.
+- The `agent-os/` directory holds project-specific spec-driven artefacts: `product/` (mission, roadmap, tech-stack), `standards/` with `index.yml` (tribal knowledge organized by area), and `specs/<YYYY-MM-DD-HHMM-slug>/` (audit trail per non-trivial change). Driven by `.claude/commands/agent-os/` slash commands. See `agent-os/README.md` and `.cursor/rules/agent-os.mdc`.

@@ -1,0 +1,72 @@
+---
+description: Spec-driven workflow using the agent-os/ directory (standards + specs + product)
+globs: agent-os/**/*, .claude/commands/agent-os/**/*
+---
+# Agent OS Workflow
+
+This repo uses **Agent OS v3** (adapted from
+[buildermethods/agent-os](https://github.com/buildermethods/agent-os), MIT, ©
+Builder Methods) for spec-driven development. The system is layered on top of
+the existing `AGENTS.md` + `.cursor/rules/` workflow — it doesn't replace
+them.
+
+## Three folders, one purpose each
+
+- `agent-os/product/` — what we're building and why
+  (`mission.md`, `roadmap.md`, `tech-stack.md`)
+- `agent-os/standards/` — project-specific tribal knowledge, organized by area
+  (`api/`, `database/`, `frontend/`, `backend/`, `testing/`, `global/`, root-level)
+  - `index.yml` is the catalog used to suggest matches.
+- `agent-os/specs/<YYYY-MM-DD-HHMM-slug>/` — one folder per non-trivial change,
+  containing `plan.md`, `shape.md`, `standards.md`, `references.md`, and
+  optional `visuals/`.
+
+## Slash commands (Claude Code)
+
+Live in `.claude/commands/agent-os/`:
+
+- `/plan-product` — bootstrap `product/` (run once)
+- `/discover-standards` — extract standards from the codebase, area by area
+- `/index-standards` — rebuild `standards/index.yml`
+- `/inject-standards` — pull relevant standards into the current context
+- `/shape-spec` — Plan-Mode helper: ask, gather, save the spec folder
+
+## When to use what
+
+- **Starting a non-trivial change** → enter Plan Mode → `/shape-spec` → approve plan → execute. Task 1 of every plan persists `plan.md` and `shape.md` so the rationale outlives the conversation.
+- **Starting any task** → `/inject-standards` (auto-suggest) or
+  `/inject-standards api database/migrations` (explicit).
+- **Noticed a recurring pattern the agent gets wrong** → `/discover-standards`
+  for that area. Keep new files **short and scannable** — they get injected
+  into context windows, every word costs tokens.
+- **Hand-edited standards** → `/index-standards`.
+
+## Authority hierarchy
+
+When guidance overlaps:
+
+1. `AGENTS.md` (Learned User Preferences) — long-lived, cross-project.
+2. `.cursor/rules/*.mdc` — agent-agnostic coding rules, the global default.
+3. `agent-os/standards/<area>/<file>.md` — project-specific override for that area.
+4. `agent-os/specs/<spec>/standards.md` — frozen snapshot used during a specific spec.
+
+A project-specific standard wins over a global rule for that project. A frozen
+snapshot inside a spec describes the standards that applied **at the time the
+spec was shaped** — useful for archaeology, not for current work.
+
+## Writing standards
+
+- Lead with the rule, explain why second (only if non-obvious).
+- Code examples beat prose.
+- One concept per file.
+- Bullet points over paragraphs.
+- Skip what the code already makes obvious.
+
+## What Agent OS does NOT do here
+
+- Doesn't replace pre-commit hooks, CI, or CodeRabbit — those still gate merges.
+- Doesn't write code. It shapes the plan and surfaces the right context;
+  implementation still goes through the verification loop in
+  `verification-loop.mdc` and the deslop pass in `deslop.mdc`.
+- `/shape-spec` is a planning aid, not a substitute for the agent thinking
+  about the change.

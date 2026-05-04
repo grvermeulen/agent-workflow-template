@@ -1,0 +1,10 @@
+# Catalog of project-specific standards.
+# Rebuilt by `/index-standards`. Used by `/inject-standards` to match by topic.
+#
+# Format:
+#   <folder>:
+#     <file-without-md>:
+#       description: One short line, used for matching.
+#
+# `root` is reserved for .md files directly in standards/ (not in a subfolder).
+# Alphabetize folders, then files. Keep descriptions to one line.
