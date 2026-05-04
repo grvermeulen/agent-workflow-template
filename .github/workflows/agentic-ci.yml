@@ -35,32 +35,55 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Detect project type
+        id: detect
+        run: |
+          if [ -f package.json ]; then
+            echo "is_node=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_node=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No package.json found — template state, Node verification steps will be skipped."
+          fi
+          if [ -f prisma/schema.prisma ] || [ -f prisma.config.ts ]; then
+            echo "has_prisma=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_prisma=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node.js
+        if: steps.detect.outputs.is_node == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
 
       - name: Install Dependencies
+        if: steps.detect.outputs.is_node == 'true'
         run: npm ci --legacy-peer-deps --ignore-scripts
 
       # Prisma 7 laadt prisma.config.ts en verwacht DATABASE_URL; generate gebruikt geen echte connectie.
       - name: Generate Prisma Client
+        if: steps.detect.outputs.is_node == 'true' && steps.detect.outputs.has_prisma == 'true'
         env:
           DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
         run: npx prisma generate
 
       - name: Check for merge conflict markers in src/
+        if: steps.detect.outputs.is_node == 'true'
         run: npm run check:merge-conflicts
 
       - name: Lint
+        if: steps.detect.outputs.is_node == 'true'
         run: npm run lint
 
       - name: Typecheck
+        if: steps.detect.outputs.is_node == 'true'
         run: npx tsc --noEmit
 
       - name: Build
+        if: steps.detect.outputs.is_node == 'true'
         run: npm run build
 
       - name: Run Tests
+        if: steps.detect.outputs.is_node == 'true'
         run: npx vitest run
