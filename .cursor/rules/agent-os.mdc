@@ -1,72 +1,61 @@
 ---
-description: Spec-driven workflow using the agent-os/ directory (standards + specs + product)
+description: Personal agentic operating system — 7-layer Agent OS structure under agent-os/
 globs: agent-os/**/*, .claude/commands/agent-os/**/*
 ---
-# Agent OS Workflow
+# Agent OS — 7-Layer Personal Agentic OS
 
-This repo uses **Agent OS v3** (adapted from
-[buildermethods/agent-os](https://github.com/buildermethods/agent-os), MIT, ©
-Builder Methods) for spec-driven development. The system is layered on top of
-the existing `AGENTS.md` + `.cursor/rules/` workflow — it doesn't replace
-them.
+This repo uses the **Agent OS** framework presented by **Nufar Gaspar** on **The AI Daily Brief** (host: Nathaniel Whittemore), episode *"How To Build a Personal Agentic Operating System"*. It's methodology, not a vendor — a "harness" around AI tooling that makes work repeatable, team-shareable, and compounding across whichever model/tool is current.
 
-## Three folders, one purpose each
+## The seven layers
 
-- `agent-os/product/` — what we're building and why
-  (`mission.md`, `roadmap.md`, `tech-stack.md`)
-- `agent-os/standards/` — project-specific tribal knowledge, organized by area
-  (`api/`, `database/`, `frontend/`, `backend/`, `testing/`, `global/`, root-level)
-  - `index.yml` is the catalog used to suggest matches.
-- `agent-os/specs/<YYYY-MM-DD-HHMM-slug>/` — one folder per non-trivial change,
-  containing `plan.md`, `shape.md`, `standards.md`, `references.md`, and
-  optional `visuals/`.
+```
+agent-os/
+├── 01-identity/             role, comms style, values, hard rules
+├── 02-context/              dated knowledge — priorities, decisions, team, external docs
+├── 03-capabilities/         declared list of tools / MCPs / slash commands / skills
+├── 04-workflow/             named end-to-end processes (trigger → steps → exit)
+├── 05-interface/            channels and per-channel output conventions
+├── 06-human-in-the-loop/    approval gates, review checkpoints, escalation triggers
+└── 07-compounding/          retros + deltas applied — feedback loop into layers 1–6
+```
 
-## Slash commands (Claude Code)
+Each layer folder contains a `README.md` describing the layer and one or more starter files. The structure is meant to travel: it works with Claude Code, Cursor, OpenCode, ChatGPT, etc.
 
-Live in `.claude/commands/agent-os/`:
+## Slash commands
 
-- `/plan-product` — bootstrap `product/` (run once)
-- `/discover-standards` — extract standards from the codebase, area by area
-- `/index-standards` — rebuild `standards/index.yml`
-- `/inject-standards` — pull relevant standards into the current context
-- `/shape-spec` — Plan-Mode helper: ask, gather, save the spec folder
+In `.claude/commands/agent-os/`:
 
-## When to use what
-
-- **Starting a non-trivial change** → enter Plan Mode → `/shape-spec` → approve plan → execute. Task 1 of every plan persists `plan.md` and `shape.md` so the rationale outlives the conversation.
-- **Starting any task** → `/inject-standards` (auto-suggest) or
-  `/inject-standards api database/migrations` (explicit).
-- **Noticed a recurring pattern the agent gets wrong** → `/discover-standards`
-  for that area. Keep new files **short and scannable** — they get injected
-  into context windows, every word costs tokens.
-- **Hand-edited standards** → `/index-standards`.
+- `/agent-os-bootstrap` — interview-driven setup of all seven layers (run once per project).
+- `/agent-os-retro` — after a meaningful session/sprint/incident, write a retro and feed concrete deltas back into layers 1–6.
 
 ## Authority hierarchy
 
 When guidance overlaps:
 
-1. `AGENTS.md` (Learned User Preferences) — long-lived, cross-project.
-2. `.cursor/rules/*.mdc` — agent-agnostic coding rules, the global default.
-3. `agent-os/standards/<area>/<file>.md` — project-specific override for that area.
-4. `agent-os/specs/<spec>/standards.md` — frozen snapshot used during a specific spec.
+1. **`AGENTS.md`** — long-lived user preferences (cross-project).
+2. **`agent-os/01-identity/identity.md`** — project-specific role and hard rules.
+3. **`agent-os/02–06/`** — project-specific context, capabilities, workflows, interfaces, gates.
+4. **`.cursor/rules/*.mdc`** — agent-agnostic coding rules (HOW to write code).
+5. **`.cursor/skills/`, `.claude/commands/`** — reusable procedures.
 
-A project-specific standard wins over a global rule for that project. A frozen
-snapshot inside a spec describes the standards that applied **at the time the
-spec was shaped** — useful for archaeology, not for current work.
+Agent OS layers describe *who the agent is, what it knows, what it can do, how it acts, and where humans gate it* — for **this** project. Cursor rules describe *how code in any project must be written*. They don't compete; they answer different questions.
 
-## Writing standards
+## How to use during a task
 
-- Lead with the rule, explain why second (only if non-obvious).
-- Code examples beat prose.
-- One concept per file.
-- Bullet points over paragraphs.
-- Skip what the code already makes obvious.
+1. **Start of a non-trivial task** — read or `@`-reference the relevant layer files. `@agent-os/01-identity/identity.md @agent-os/02-context/context.md` is a strong default.
+2. **Before a destructive or external action** — check `agent-os/06-human-in-the-loop/human-in-the-loop.md`. If the action matches an approval gate or escalation trigger, stop and ask.
+3. **After the task** — run `/agent-os-retro` if the session produced lessons. Even one delta compounds.
 
-## What Agent OS does NOT do here
+## How to evolve the OS
 
-- Doesn't replace pre-commit hooks, CI, or CodeRabbit — those still gate merges.
-- Doesn't write code. It shapes the plan and surfaces the right context;
-  implementation still goes through the verification loop in
-  `verification-loop.mdc` and the deslop pass in `deslop.mdc`.
-- `/shape-spec` is a planning aid, not a substitute for the agent thinking
-  about the change.
+- New repeated correction → likely Layer 2 (context fact missing) or Layer 6 (gate missing).
+- New tool you keep forgetting → Layer 3.
+- "We do this every week" → Layer 4 (name the workflow).
+- "Agent was too chatty in PR comments" → Layer 5.
+- Don't edit Layer 7 by hand — it's the output of `/agent-os-retro`.
+
+## What this is NOT
+
+- Not a replacement for `.cursor/rules/`, `.cursor/skills/`, pre-commit hooks, or CI gates — those still run.
+- Not a place to dump everything. Each layer has a focused purpose; if something doesn't fit, it probably belongs in a cursor rule, a skill, or `AGENTS.md`.
+- Not static. If a layer file hasn't been touched in months, run a retro and check whether reality moved.
