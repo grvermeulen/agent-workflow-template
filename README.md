@@ -14,6 +14,8 @@ A GitHub template repo that bootstraps a new project with the agent/AI-assisted-
 | `.cursor/hooks.ts` | Experimental Cursor hooks: blocks destructive shell commands; runs linters/formatters after edits. |
 | `.claude/commands/loop-on-ci.md` | Claude Code slash command that watches PR CI, fixes failures, addresses bot review feedback, and iterates until green. |
 | `.claude/commands/vercel-setup.md` | Claude Code slash command that bootstraps Vercel for a new repo: creates the project, links it to GitHub, sets production env vars (and asks about preview), then triggers the first deploy. |
+| `.claude/commands/agent-os/` | Agent OS slash commands: `bootstrap` (interview-driven setup of all 7 layers) and `retro` (feed deltas back into layers 1–6 after a session). |
+| `agent-os/` | 7-layer personal agentic OS — `01-identity`, `02-context`, `03-capabilities`, `04-workflow`, `05-interface`, `06-human-in-the-loop`, `07-compounding`. Each layer has a `README.md` and starter file. Framework from *The AI Daily Brief* (Nufar Gaspar / Nathaniel Whittemore), *"How To Build a Personal Agentic Operating System"*. See `agent-os/README.md`. |
 | `.husky/pre-commit` | Prettier on staged files → merge-conflict marker check → ESLint → `tsc --noEmit` → `vitest run`. |
 | `.husky/pre-push` | `npm run docs:check`. |
 | `.github/workflows/agentic-ci.yml` | Lint / typecheck / build / test verify pipeline. |
@@ -31,6 +33,7 @@ A GitHub template repo that bootstraps a new project with the agent/AI-assisted-
 4. Configure CodeRabbit in your repo settings if you haven't already; the `.coderabbit.yaml` here will be picked up on first PR.
 5. Configure repo secrets the workflows need (e.g. `OPENAI_API_KEY` if `ai-review.yml` uses it; review each workflow before enabling).
 6. **If you're hosting on Vercel:** run the `/vercel-setup` slash command (or have an agent run it). It walks an agent through creating the Vercel project, linking the GitHub repo, setting production env vars, asking whether a preview environment is wanted, and triggering the first deploy. See `.claude/commands/vercel-setup.md`.
+7. **Bootstrap the Agent OS:** run `/agent-os-bootstrap`. It walks you through all seven layers (Identity, Context, Capabilities, Workflow, Interface, Human-in-the-Loop, Compounding) one question at a time and writes real content into `agent-os/01-identity/` through `06-human-in-the-loop/`. Layer 7 stays empty until you run `/agent-os-retro` after a real session. See `agent-os/README.md` for the framework and how the layers relate to `.cursor/rules/` and `.cursor/skills/`.
 
 ## Things this template intentionally does NOT include
 

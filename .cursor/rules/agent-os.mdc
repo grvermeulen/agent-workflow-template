@@ -1,0 +1,61 @@
+---
+description: Personal agentic operating system — 7-layer Agent OS structure under agent-os/
+globs: agent-os/**/*, .claude/commands/agent-os/**/*
+---
+# Agent OS — 7-Layer Personal Agentic OS
+
+This repo uses the **Agent OS** framework presented by **Nufar Gaspar** on **The AI Daily Brief** (host: Nathaniel Whittemore), episode *"How To Build a Personal Agentic Operating System"*. It's methodology, not a vendor — a "harness" around AI tooling that makes work repeatable, team-shareable, and compounding across whichever model/tool is current.
+
+## The seven layers
+
+```
+agent-os/
+├── 01-identity/             role, comms style, values, hard rules
+├── 02-context/              dated knowledge — priorities, decisions, team, external docs
+├── 03-capabilities/         declared list of tools / MCPs / slash commands / skills
+├── 04-workflow/             named end-to-end processes (trigger → steps → exit)
+├── 05-interface/            channels and per-channel output conventions
+├── 06-human-in-the-loop/    approval gates, review checkpoints, escalation triggers
+└── 07-compounding/          retros + deltas applied — feedback loop into layers 1–6
+```
+
+Each layer folder contains a `README.md` describing the layer and one or more starter files. The structure is meant to travel: it works with Claude Code, Cursor, OpenCode, ChatGPT, etc.
+
+## Slash commands
+
+In `.claude/commands/agent-os/`:
+
+- `/agent-os-bootstrap` — interview-driven setup of all seven layers (run once per project).
+- `/agent-os-retro` — after a meaningful session/sprint/incident, write a retro and feed concrete deltas back into layers 1–6.
+
+## Authority hierarchy
+
+When guidance overlaps:
+
+1. **`AGENTS.md`** — long-lived user preferences (cross-project).
+2. **`agent-os/01-identity/identity.md`** — project-specific role and hard rules.
+3. **`agent-os/02–06/`** — project-specific context, capabilities, workflows, interfaces, gates.
+4. **`.cursor/rules/*.mdc`** — agent-agnostic coding rules (HOW to write code).
+5. **`.cursor/skills/`, `.claude/commands/`** — reusable procedures.
+
+Agent OS layers describe *who the agent is, what it knows, what it can do, how it acts, and where humans gate it* — for **this** project. Cursor rules describe *how code in any project must be written*. They don't compete; they answer different questions.
+
+## How to use during a task
+
+1. **Start of a non-trivial task** — read or `@`-reference the relevant layer files. `@agent-os/01-identity/identity.md @agent-os/02-context/context.md` is a strong default.
+2. **Before a destructive or external action** — check `agent-os/06-human-in-the-loop/human-in-the-loop.md`. If the action matches an approval gate or escalation trigger, stop and ask.
+3. **After the task** — run `/agent-os-retro` if the session produced lessons. Even one delta compounds.
+
+## How to evolve the OS
+
+- New repeated correction → likely Layer 2 (context fact missing) or Layer 6 (gate missing).
+- New tool you keep forgetting → Layer 3.
+- "We do this every week" → Layer 4 (name the workflow).
+- "Agent was too chatty in PR comments" → Layer 5.
+- Don't edit Layer 7 by hand — it's the output of `/agent-os-retro`.
+
+## What this is NOT
+
+- Not a replacement for `.cursor/rules/`, `.cursor/skills/`, pre-commit hooks, or CI gates — those still run.
+- Not a place to dump everything. Each layer has a focused purpose; if something doesn't fit, it probably belongs in a cursor rule, a skill, or `AGENTS.md`.
+- Not static. If a layer file hasn't been touched in months, run a retro and check whether reality moved.
