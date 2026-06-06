@@ -1,48 +1,46 @@
 # Capabilities
 
-_Last updated: YYYY-MM-DD_
+_Last updated: 2026-06-06_
 
-<!--
-Format:  - `<name>` — <one-line description> · <scope> · <trust> · <link>
-Scope: read-only | mutating | destructive
-Trust: auto | asks-first | explicit-only
--->
+**Default trust model:** read freely (auto); perform write/mutating/external actions but **log** them; for any **new** permission, ask the user first, then record it as approved (see `06-human-in-the-loop/`). Cos is the sole grantor of access rights to other agents.
+
+Format: `<name>` — <description> · <scope> · <trust>
 
 ## Built-in
 
-<!--
-- `Read`, `Edit`, `Write`, `Bash` — file & shell access · mutating · auto
-- `git` (via Bash) — version control · mutating · asks-first for push/force/reset
--->
+- `Read`, `Edit`, `Write` — file access · read/mutating · auto (read) / log (write)
+- `Bash` — shell · mutating · auto for read-only; log for writes; ask for destructive
+- `Agent` — spawn sub-agents / delegate work · mutating · auto (this is how Cos delegates)
 
 ## MCP servers
 
-<!--
-- `github` — PRs, reviews, CI, issues · mutating · asks-first for write ops
-- `sentry` — issue search, attachments · read-only · auto
-- `slack`, `atlassian`, `supabase`, `vercel` — see settings.json
--->
+- `github` — repos, PRs, issues, projects, CI, reviews · mutating · auto read · log writes. **Backbone / source of truth.**
+- `vercel` — deployments, projects, logs · mutating · log writes; ask before production deploy
+- `supabase` — DB, migrations, edge functions · mutating/destructive · ask before migrations/applies
+- `atlassian` — Jira issues, Confluence pages · mutating · log writes
+- `slack` — read/post messages, canvases · mutating · ask before posting externally
 
 ## Slash commands
 
-<!--
-- `/loop-on-ci` — watch CI, fix failures, address review threads
-- `/vercel-setup` — Vercel project bootstrap (one-time)
-- `/agent-os-bootstrap` — fill in this Agent OS structure
+- `/loop-on-ci` — watch CI, fix failures, address + resolve review threads
+- `/vercel-setup` — one-time Vercel project bootstrap
+- `/agent-os-bootstrap` — fill the Agent OS layers
 - `/agent-os-retro` — feed lessons back into the layers
--->
 
 ## Skills
 
-<!--
 - `verification-loop` — pre-PR validation
 - `deslop` — strip narration / dead defensive code
 - `search-first` — search before writing new utilities
-- `code-review`, `security-review`
--->
+- `code-review`, `security-review` — review the current diff
 
-## External APIs / services
+## Cos orchestration capabilities
 
-<!--
-- (list any project-specific APIs the agent has credentials for)
--->
+- **Delegate** — assign work to sub-agents (via `Agent`) or to the right tool.
+- **Hire / create agents** — formulate requirements and create a specialized agent on demand, or stand up an **HR agent** to do the hiring.
+- **Cockpit app** — build and maintain the board (backlog / in-progress / done) + agent roster + access rights, backed by GitHub.
+- **Grant access rights** — sole grantor; new permission → ask user → record approved → grant onward as fit.
+
+## Cross-tool reach (not yet wired)
+
+- Oversight of agents in **ChatGPT, Gemini, xAI, ElevenLabs** — desired, but no operational integration exists here yet (open question in `02-context/`).
