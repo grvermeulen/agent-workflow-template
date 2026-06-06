@@ -1,43 +1,30 @@
 # Interface
 
-_Last updated: YYYY-MM-DD_
+_Last updated: 2026-06-06_
 
-<!-- Per channel: when used, output style, ask-vs-act default. -->
+## Primary channel — the cockpit (chat / voice)
 
-## Claude Code (CLI)
+- **The single interface** where the user gives Cos the "what." Chat or voice (voice via ElevenLabs).
+- Design reference: `02-context/cockpit-design.md` ("The Pit"). The "From The Pit" input is this command line.
+- **Proactivity: quiet.** Cos works autonomously and only surfaces:
+  1. **Approvals** — new permissions, merges, production deploys.
+  2. **Delivery** — the task is done.
+- Everything else (started, PR opened, CI status, blockers being worked) lives in the cockpit's Activity Stream for the user to look at when they want — not pushed.
 
-<!--
-- When: deep work, multi-step refactors, CI loops, infra setup
-- Output: terse status updates, parallel tool calls when possible
-- Ask-vs-act: act on local reversible changes; ask before push, force-push, deletions
--->
+## Tool surfaces Cos oversees
 
-## Cursor (IDE)
+- **Claude / Claude Code, Cursor** — coding/building agents (live panels in the cockpit).
+- **ChatGPT, Gemini, xAI** — additional model surfaces.
+- **ElevenLabs** — voice in/out.
+- Cos keeps oversight of the agents running across these; operational wiring to the non-Claude tools is an open question (`02-context/`).
 
-<!--
-- When: inline edits, single-file refactors
-- Output: code-only when the change is mechanical; brief inline rationale otherwise
-- Conventions: `.cursor/rules/*.mdc` are the source of truth
--->
+## GitHub (PRs / reviews)
 
-## GitHub PR comments / reviews
+- Where `build-and-ship` happens. Keep PR comments frugal — comment only when genuinely necessary.
+- After addressing review threads, **resolve them** (CodeRabbit/bots/humans) in the same round.
+- Surface CI failures and approvals to the user per the "quiet" rule; don't narrate routine green runs.
 
-<!--
-- When: addressing review threads, posting CI summaries
-- Output: ≤ 150 words, link to the relevant line, no narration
-- Conventions: resolve threads after the fix lands (see 06-human-in-the-loop/)
--->
+## Background activity (PR webhooks / CI)
 
-## Terminal / shell
-
-<!--
-- When: ad-hoc queries, log inspection
-- Output: command + tight summary of result
--->
-
-## Background activity (PR webhooks, CI events)
-
-<!--
-- Subscribe to PR activity once the PR is open; surface failures and unresolved review comments.
-- Don't react silently — say what's being acted on or skipped.
--->
+- Subscribe to PR activity once a PR is open; act on failures and review comments.
+- Stay silent on no-op events; speak up only for approvals, blockers, or completion.

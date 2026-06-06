@@ -15,10 +15,10 @@ Format: `<name>` — <description> · <scope> · <trust>
 ## MCP servers
 
 - `github` — repos, PRs, issues, projects, CI, reviews · mutating · auto read · log writes. **Backbone / source of truth.**
-- `vercel` — deployments, projects, logs · mutating · log writes; ask before production deploy
-- `supabase` — DB, migrations, edge functions · mutating/destructive · ask before migrations/applies
-- `atlassian` — Jira issues, Confluence pages · mutating · log writes
-- `slack` — read/post messages, canvases · mutating · ask before posting externally
+- `vercel` — deployments, projects, logs · mutating · log writes; **prod deploy auto + logged** (per Layer 6)
+- `supabase` — DB, migrations, edge functions · mutating/destructive · **ask before migrations/applies** (destructive)
+- `atlassian` — Jira issues, Confluence pages · mutating · log internal writes; **ask before external/public posts**
+- `slack` — read/post messages, canvases · mutating · **ask before posting** (external)
 
 ## Slash commands
 

@@ -16,7 +16,7 @@ The user already runs many AI tools and does not want to manage which work happe
 
 ## Active priorities
 
-1. **Build the cockpit app** — the chat/voice interface plus the board showing backlog / in-progress / done and the agent roster with their purpose and access rights. This is the current top priority.
+1. **Build the cockpit app** — the chat/voice interface plus the board showing backlog / in-progress / done and the agent roster with their purpose and access rights. This is the current top priority. Early design idea ("The Pit") captured in `cockpit-design.md` — use it as the starting reference.
 
 ## Recent decisions
 
