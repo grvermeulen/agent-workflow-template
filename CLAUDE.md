@@ -12,7 +12,7 @@ Two kinds of work happen here:
 
 ## Authority hierarchy (read this first when guidance conflicts)
 
-`AGENTS.md` > `agent-os/01-identity/` > `agent-os/02–06` > `.cursor/rules/`
+`AGENTS.md` > `agent-os/01-identity/` > `agent-os/02–06` > `.cursor/rules/` > `.cursor/skills/`, `.claude/commands/`
 
 - **`AGENTS.md`** — long-lived, cross-project user preferences (`Learned User Preferences`) and per-project `Learned Workspace Facts` (placeholder until filled). Edit this first in a new project. Note: several preferences here are written in Dutch.
 - **`agent-os/`** — *who the agent is and what it knows* for a specific project.
