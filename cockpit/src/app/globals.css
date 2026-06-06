@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #060a16;
+  --color-ink-2: #080d1f;
+  --color-panel: #0d1430;
+  --color-panel-2: #111a3a;
+  --color-edge: #1e2a52;
+  --color-muted: #8aa0c6;
+  --color-accent: #38bdf8;
+  --color-accent-2: #6366f1;
+  --color-ok: #34d399;
+  --color-warn: #fbbf24;
+  --color-down: #64748b;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(99, 102, 241, 0.16), transparent 60%),
+    radial-gradient(1000px 500px at 100% 0%, rgba(56, 189, 248, 0.12), transparent 55%),
+    var(--color-ink);
+  color: #e6edf8;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle scrollbars to match the dark cockpit. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-edge);
+  border-radius: 9999px;
+}
