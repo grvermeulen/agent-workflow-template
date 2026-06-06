@@ -1,34 +1,36 @@
 # Human-in-the-Loop
 
-_Last updated: YYYY-MM-DD_
+_Last updated: 2026-06-06_
+
+Trust model: Cos reads freely, performs routine writes **auto + logged** (to the cockpit), and stops for the gates below.
 
 ## Approval gates (always ask first)
 
-<!--
-- `git push` to any branch — confirm target branch.
-- `git push --force` / `--force-with-lease` — confirm + verify branch isn't main.
-- `git reset --hard`, `git checkout -- .`, `rm -rf` — confirm + show what's at risk.
-- Database migrations against shared DBs.
-- Posting to Slack / Jira / external services.
-- Merging PRs.
--->
+- **New permission / access right** — the core Cos gate. New permission → ask the user (what, why, scope) → record as an **approved permission** → only then grant it onward. Cos is the sole grantor; agents never self-grant.
+- **Destructive or irreversible actions:**
+  - DB migrations against shared data; deleting repos, branches, or data.
+  - `git push --force` / `--force-with-lease`, `git reset --hard`, `rm -rf`.
+  - Posting publicly / externally (Slack, Jira, anything outbound to third parties).
 
-## Review checkpoints (workflow gates)
+## Auto + logged (no pre-approval — Cos owns these)
 
-<!--
-- Pre-commit: Prettier → merge-conflict check → ESLint → tsc → vitest (.husky/pre-commit)
-- Pre-push: docs:check (.husky/pre-push)
-- PR open: agentic-ci verify, AI Review, CodeRabbit
-- Pre-merge: CodeRabbit Major-gate must pass
-- Post-merge: post-merge-verify on default branch
--->
+- Routine file/code writes, commits, pushes to the working branch, opening PRs.
+- **Merging PRs** to the default branch.
+- **Production deploys** (e.g. Vercel prod).
+- Each is recorded in the cockpit activity stream; the user is told only at delivery (see `05-interface/` — "quiet").
 
-## Escalation triggers (stop and ask)
+## Review checkpoints (automated gates that still run)
 
-<!--
-- Diff > N files or > N lines without a clear reason.
-- A standard or rule contradicts the requested change.
-- Required test is missing for the change being made.
-- Secret/credential surfaces in a diff.
-- Unfamiliar branch, file, or directory exists — investigate before deleting/overwriting.
--->
+- Pre-commit: Prettier → merge-conflict check → ESLint → `tsc --noEmit` → vitest (`.husky/pre-commit`).
+- Pre-push: `docs:check` (`.husky/pre-push`).
+- PR open: Agentic CI, AI Review, CodeRabbit.
+- Pre-merge: CodeRabbit Major-gate must pass.
+- Post-merge: post-merge-verify on the default branch.
+
+## Escalation triggers (stop and ask, even mid-task)
+
+- A standard, rule, or `AGENTS.md` preference contradicts the requested change.
+- A secret or credential surfaces in a diff.
+- An unfamiliar branch, file, or directory turns up — investigate before deleting/overwriting.
+- A required test is missing for the change being made.
+- The change balloons well beyond the requested scope without a clear reason.
