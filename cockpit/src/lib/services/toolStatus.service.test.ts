@@ -10,6 +10,7 @@ describe("toolStatus.service", () => {
       "SUPABASE_URL",
       "SUPABASE_ANON_KEY",
       "ANTHROPIC_API_KEY",
+      "CURSOR_API_KEY",
       "OPENAI_API_KEY",
     ]) {
       vi.stubEnv(key, "");
