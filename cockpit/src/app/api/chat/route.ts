@@ -3,6 +3,11 @@ import { chatRequestSchema } from "@/lib/schemas/chat";
 import { replyAsCos } from "@/lib/services/cos.service";
 import { logger } from "@/lib/logger";
 
+// The subscription path spawns the Claude Code CLI subprocess — needs the Node
+// runtime and room to run (Vercel caps maxDuration by plan; Hobby is 10s).
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
 /**
  * POST /api/chat — Cos replies to a "From The Pit" conversation. Uses Claude when
  * configured, otherwise the keyword planner (see `cos.service`).

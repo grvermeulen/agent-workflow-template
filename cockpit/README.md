@@ -61,11 +61,24 @@ pins the framework).
 
 ## Chat ("From The Pit")
 
-The command bar is a real chat with Cos. With `ANTHROPIC_API_KEY` set, it answers via
-Claude (`claude-opus-4-8`) using Cos's persona (Chief of Staff; you give the "what",
-Cos owns the "how"; honors the approval gates). Without a key it falls back to a
-keyword **planner** so the chat still works — every reply is tagged `Claude` or
-`planner` in the UI. Endpoint: `POST /api/chat` with `{ messages: [{role, content}] }`.
+The command bar is a real chat with Cos, using Cos's persona (Chief of Staff; you
+give the "what", Cos owns the "how"; honors the approval gates). It answers through
+the first available of, in order:
+
+1. **Your Claude subscription** — set `CLAUDE_CODE_OAUTH_TOKEN` (from
+   `claude setup-token` while signed into your Pro/Max plan). The chat runs Claude
+   Code headlessly via `@anthropic-ai/claude-agent-sdk`, billed to your subscription
+   — **no API usage**.
+2. **The Anthropic API** — `ANTHROPIC_API_KEY` (billed as API usage).
+3. **Keyword planner** — no credentials needed, so the chat always works.
+
+Each reply is tagged `Claude` or `planner` in the UI. Endpoint: `POST /api/chat`
+with `{ messages: [{role, content}] }`.
+
+> **Host note:** the subscription path spawns the Claude Code CLI subprocess. That
+> needs the Node runtime and enough execution time (the route sets `maxDuration = 60`,
+> capped by your Vercel plan — Hobby is 10s). If a host can't run the subprocess, the
+> chat automatically degrades to the API key or planner.
 
 ## Status — v1
 

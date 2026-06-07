@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { query } from "@anthropic-ai/claude-agent-sdk";
 import { readEnv } from "@/lib/config/env";
 import { logger } from "@/lib/logger";
 import { planCommand } from "@/lib/services/command.service";
@@ -23,12 +24,24 @@ Gedragsregels:
 - Wees rustig en zakelijk; geen onnodige uitweiding.`;
 
 /**
- * Whether Cos can answer via Claude (an Anthropic key is configured).
+ * Whether Cos can answer via the user's Claude subscription (a Claude Code OAuth
+ * token is configured). This routes through Claude Code instead of API billing.
  *
- * @returns True when `ANTHROPIC_API_KEY` is present.
+ * @returns True when `CLAUDE_CODE_OAUTH_TOKEN` is present.
+ */
+export function isCosSubscriptionEnabled(): boolean {
+  return Boolean(readEnv().CLAUDE_CODE_OAUTH_TOKEN);
+}
+
+/**
+ * Whether Cos can answer with a real model — either via the subscription
+ * (Claude Code) or the Anthropic API.
+ *
+ * @returns True when a subscription token or API key is present.
  */
 export function isCosLlmEnabled(): boolean {
-  return Boolean(readEnv().ANTHROPIC_API_KEY);
+  const env = readEnv();
+  return Boolean(env.CLAUDE_CODE_OAUTH_TOKEN || env.ANTHROPIC_API_KEY);
 }
 
 /**
@@ -45,8 +58,22 @@ function lastUserText(messages: ChatMessage[]): string {
 }
 
 /**
- * Planner fallback used when Claude is unavailable: reuses the keyword planner so
- * the chat still returns a useful plan without any API key.
+ * Renders the turn history as a single transcript prompt for the single-shot
+ * Claude Code path, ending with Cos's turn to answer.
+ *
+ * @param messages - The conversation so far.
+ * @returns The transcript prompt.
+ */
+function transcript(messages: ChatMessage[]): string {
+  const lines = messages.map(
+    (message) => `${message.role === "user" ? "Gebruiker" : "Cos"}: ${message.content}`,
+  );
+  return `${lines.join("\n\n")}\n\nCos:`;
+}
+
+/**
+ * Planner fallback used when no model is available: reuses the keyword planner so
+ * the chat still returns a useful plan without any credentials.
  *
  * @param messages - The conversation so far.
  * @returns A planner-mode reply.
@@ -62,43 +89,89 @@ function plannerReply(messages: ChatMessage[]): ChatReply {
 }
 
 /**
- * Produces Cos's reply to a chat turn. Uses Claude when configured; otherwise
- * falls back to the keyword planner so the chat always works. Any Claude error
- * degrades to the planner rather than failing the request.
+ * Answers via the user's Claude subscription by running Claude Code headlessly
+ * (the Agent SDK spawns the Claude Code CLI, which uses `CLAUDE_CODE_OAUTH_TOKEN`
+ * for subscription billing). Tools are disabled — this is a single-shot chat.
+ *
+ * @param messages - The conversation history.
+ * @returns Cos's reply text, or an empty string if nothing was produced.
+ */
+async function replyViaClaudeCode(messages: ChatMessage[]): Promise<string> {
+  // Claude Code writes config/state; point it at a writable dir for serverless hosts.
+  if (!process.env.CLAUDE_CONFIG_DIR) {
+    process.env.CLAUDE_CONFIG_DIR = "/tmp/.claude-cos";
+  }
+
+  let reply = "";
+  for await (const message of query({
+    prompt: transcript(messages),
+    options: {
+      systemPrompt: COS_SYSTEM_PROMPT,
+      allowedTools: [],
+      maxTurns: 1,
+      permissionMode: "bypassPermissions",
+      model: COS_MODEL,
+    },
+  })) {
+    if (message.type === "assistant") {
+      for (const block of message.message.content) {
+        if (block.type === "text") reply += block.text;
+      }
+    }
+  }
+  return reply.trim();
+}
+
+/**
+ * Answers via the Anthropic API (`ANTHROPIC_API_KEY`). Billed as API usage.
+ *
+ * @param messages - The conversation history.
+ * @param apiKey - The Anthropic API key.
+ * @returns Cos's reply text, or an empty string.
+ */
+async function replyViaApi(messages: ChatMessage[], apiKey: string): Promise<string> {
+  const client = new Anthropic({ apiKey });
+  const response = await client.messages.create({
+    model: COS_MODEL,
+    max_tokens: 1024,
+    system: COS_SYSTEM_PROMPT,
+    messages: messages.map((message) => ({ role: message.role, content: message.content })),
+  });
+  return response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === "text")
+    .map((block) => block.text)
+    .join("")
+    .trim();
+}
+
+/**
+ * Produces Cos's reply to a chat turn. Preference order, each degrading to the
+ * next on absence or error: the user's Claude subscription (Claude Code) →
+ * the Anthropic API → the keyword planner. The chat therefore always works.
  *
  * @param messages - The full conversation history (user/assistant turns).
  * @returns Cos's reply and how it was produced.
  */
 export async function replyAsCos(messages: ChatMessage[]): Promise<ChatReply> {
-  const { ANTHROPIC_API_KEY } = readEnv();
-  if (!ANTHROPIC_API_KEY) {
-    return plannerReply(messages);
-  }
+  const { CLAUDE_CODE_OAUTH_TOKEN, ANTHROPIC_API_KEY } = readEnv();
 
-  try {
-    const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
-    const response = await client.messages.create({
-      model: COS_MODEL,
-      max_tokens: 1024,
-      system: COS_SYSTEM_PROMPT,
-      messages: messages.map((message) => ({
-        role: message.role,
-        content: message.content,
-      })),
-    });
-
-    const reply = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("")
-      .trim();
-
-    if (!reply) {
-      return plannerReply(messages);
+  if (CLAUDE_CODE_OAUTH_TOKEN) {
+    try {
+      const reply = await replyViaClaudeCode(messages);
+      if (reply) return { reply, mode: "llm" };
+    } catch (error: unknown) {
+      logger.error("cos.replyViaClaudeCode", error);
     }
-    return { reply, mode: "llm" };
-  } catch (error: unknown) {
-    logger.error("cos.replyAsCos", error);
-    return plannerReply(messages);
   }
+
+  if (ANTHROPIC_API_KEY) {
+    try {
+      const reply = await replyViaApi(messages, ANTHROPIC_API_KEY);
+      if (reply) return { reply, mode: "llm" };
+    } catch (error: unknown) {
+      logger.error("cos.replyViaApi", error);
+    }
+  }
+
+  return plannerReply(messages);
 }

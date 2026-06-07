@@ -23,7 +23,7 @@ The user already runs many AI tools and does not want to manage which work happe
 - **Code:** `cockpit/` in this repo — Next.js 15 + Tailwind v4 + TypeScript, service layer, Zod, Vitest. Built from `cockpit-design.md`.
 - **Live:** deployed on Vercel (project `cos`, root directory `cockpit/`) at **https://cos-lemon.vercel.app**. Auto-deploys from `main` via the GitHub integration.
 - **Live data:** with `GITHUB_TOKEN` set, the work board (issues → backlog, PRs → in-progress) and activity feed are live. Other tools light up per their env keys (`.env.example`).
-- **Chat:** the "From The Pit" bar talks to Cos via Claude (`claude-opus-4-8`) when `ANTHROPIC_API_KEY` is set, with a keyword-planner fallback so it works without a key.
+- **Chat:** the "From The Pit" bar talks to Cos (`claude-opus-4-8`), choosing the brain in order: the user's **Claude subscription** (`CLAUDE_CODE_OAUTH_TOKEN`, via Claude Code headless — preferred, no API billing) → **Anthropic API** (`ANTHROPIC_API_KEY`) → keyword **planner** fallback so it works without any credentials.
 
 ## Recent decisions
 
