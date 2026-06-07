@@ -46,8 +46,8 @@ describe("cos.service", () => {
     expect(reply.intent).toBe("build");
     expect(reply.mode).toBe("planner");
     expect(reply.reply).toContain("COS_WORK_REPO");
-    expect(dispatchMock).not.toHaveBeenCalled();
-    expect(queryMock).not.toHaveBeenCalled();
+    expect(dispatchMock).toHaveBeenCalledTimes(0);
+    expect(queryMock).toHaveBeenCalledTimes(0);
   });
 
   it("answers via the Claude subscription off-Vercel when a token is set", async () => {
