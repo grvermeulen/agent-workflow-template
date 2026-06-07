@@ -19,6 +19,7 @@ const envSchema = z.object({
   ATLASSIAN_API_TOKEN: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   CLAUDE_CODE_OAUTH_TOKEN: z.string().optional(),
+  CURSOR_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   XAI_API_KEY: z.string().optional(),

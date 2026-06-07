@@ -36,6 +36,12 @@ describe("toolStatus.service", () => {
     expect(cursor?.state).toBe("degraded");
   });
 
+  it("marks Cursor connected when CURSOR_API_KEY is present", () => {
+    vi.stubEnv("CURSOR_API_KEY", "cur_test");
+    const cursor = getToolStatuses().find((tool) => tool.id === "cursor");
+    expect(cursor?.state).toBe("connected");
+  });
+
   it("requires all keys for a multi-key integration", () => {
     vi.stubEnv("SUPABASE_URL", "https://x.supabase.co");
     const offline = getToolStatuses().find((tool) => tool.id === "supabase");
