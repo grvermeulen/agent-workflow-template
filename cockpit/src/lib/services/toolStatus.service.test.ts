@@ -12,6 +12,8 @@ describe("toolStatus.service", () => {
       "ANTHROPIC_API_KEY",
       "CURSOR_API_KEY",
       "OPENAI_API_KEY",
+      "GEMINI_API_KEY",
+      "GOOGLE_API_KEY",
     ]) {
       vi.stubEnv(key, "");
     }
@@ -41,6 +43,12 @@ describe("toolStatus.service", () => {
     vi.stubEnv("CURSOR_API_KEY", "cur_test");
     const cursor = getToolStatuses().find((tool) => tool.id === "cursor");
     expect(cursor?.state).toBe("connected");
+  });
+
+  it("marks Gemini connected via GOOGLE_API_KEY (alias for GEMINI_API_KEY)", () => {
+    vi.stubEnv("GOOGLE_API_KEY", "g_test");
+    const gemini = getToolStatuses().find((tool) => tool.id === "gemini");
+    expect(gemini?.state).toBe("connected");
   });
 
   it("requires all keys for a multi-key integration", () => {

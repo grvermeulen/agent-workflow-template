@@ -4,6 +4,8 @@ import { readEnv } from "@/lib/config/env";
 import { logger } from "@/lib/logger";
 import { detectIntent, planCommand } from "@/lib/services/command.service";
 import { dispatchToClaudeCode, isDispatchConfigured } from "@/lib/services/dispatch.service";
+import { getToolStatuses } from "@/lib/services/toolStatus.service";
+import type { ConnectionState } from "@/lib/schemas/tool";
 import type { ChatMessage, ChatReply } from "@/lib/schemas/chat";
 
 /** The model Cos speaks with. */
@@ -21,11 +23,55 @@ const COS_SYSTEM_PROMPT = `Je bent Cos, de Chief of Staff van de gebruiker. De g
 
 Je orkestreert werk en delegeert naar de juiste agent of tool: Claude Code en Cursor (bouwen), ChatGPT, Gemini en xAI (onderzoek/modellen), ElevenLabs (spraak). Je houdt overzicht via het cockpit "The Pit". GitHub is de bron van waarheid: de backlog zijn issues, lopend werk zijn pull requests.
 
+Wat je zelf kunt (zeg nooit dat je "Claude Code niet kunt draaien" of dat er "geen koppeling" is):
+- Voor bouw-, deploy- of wervingswerk delegeer je naar Claude Code op GitHub: er wordt automatisch een issue met @claude geopend en Claude Code voert het uit op het abonnement van de gebruiker en opent een pull request.
+- Vragen over welke tools of sleutels gekoppeld zijn beantwoordt het cockpit direct vanuit zijn eigen omgeving — toon alleen sleutelnamen en status, nooit de waarden.
+
 Gedragsregels:
 - Antwoord kort, helder en in het Nederlands.
 - Voor uitvoerend of muterend werk: beschrijf eerst je plan (de "hoe") en welke agent of tool het oppakt.
 - Respecteer goedkeuringspoorten: nieuwe toegangsrechten en destructieve of externe acties vereisen akkoord van de gebruiker.
 - Wees rustig en zakelijk; geen onnodige uitweiding.`;
+
+/** Env-var label shown per tool in the status checklist (names only, never values). */
+const TOOL_ENV_LABEL: Record<string, string> = {
+  "claude-code": "ANTHROPIC_API_KEY of CLAUDE_CODE_OAUTH_TOKEN",
+  cursor: "CURSOR_API_KEY",
+  github: "GITHUB_TOKEN",
+  vercel: "VERCEL_TOKEN",
+  supabase: "SUPABASE_URL + SUPABASE_ANON_KEY",
+  slack: "SLACK_BOT_TOKEN",
+  atlassian: "ATLASSIAN_API_TOKEN",
+  chatgpt: "OPENAI_API_KEY",
+  gemini: "GEMINI_API_KEY of GOOGLE_API_KEY",
+  xai: "XAI_API_KEY",
+  elevenlabs: "ELEVENLABS_API_KEY",
+};
+
+const STATE_MARK: Record<ConnectionState, string> = {
+  connected: "✅",
+  degraded: "⚠️",
+  offline: "❌",
+};
+
+/**
+ * Builds the tool/key checklist from the cockpit's own environment — exactly the
+ * kind of "which keys are set?" question Cos can answer directly (no Claude Code).
+ * Reports key names and status only; never the values.
+ *
+ * @returns A status-mode reply with the checklist.
+ */
+function statusReply(): ChatReply {
+  const lines = getToolStatuses().map(
+    (tool) => `${STATE_MARK[tool.state]} ${tool.name} (${TOOL_ENV_LABEL[tool.id] ?? "—"})`,
+  );
+  return {
+    reply: `Status van je gekoppelde tools — alleen sleutelnamen, nooit de waarden:\n${lines.join("\n")}\n\n⚠️ = handmatig gekoppeld. Wil je een ontbrekende sleutel toevoegen, zet hem in de Vercel-omgevingsvariabelen.`,
+    mode: "planner",
+    intent: "status",
+    assignedTo: "Cos",
+  };
+}
 
 /**
  * Whether a Claude subscription token is configured (drives the tool tile).
@@ -175,6 +221,11 @@ export async function replyAsCos(messages: ChatMessage[]): Promise<ChatReply> {
   const { ANTHROPIC_API_KEY } = readEnv();
   const text = lastUserText(messages);
   const intent = detectIntent(text);
+
+  // Cos answers tool/key status itself, from the cockpit's own environment.
+  if (intent === "status") {
+    return statusReply();
+  }
 
   if (DELEGATABLE_INTENTS.has(intent) && isDispatchConfigured()) {
     const issue = await dispatchToClaudeCode(text);

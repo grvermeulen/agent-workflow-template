@@ -22,6 +22,7 @@ const envSchema = z.object({
   CURSOR_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
+  GOOGLE_API_KEY: z.string().optional(),
   XAI_API_KEY: z.string().optional(),
   ELEVENLABS_API_KEY: z.string().optional(),
 });

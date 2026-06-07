@@ -74,6 +74,19 @@ describe("cos.service", () => {
     expect(reply.mode).toBe("planner");
   });
 
+  it("answers tool/key status itself, without the LLM or delegation", async () => {
+    vi.stubEnv("GITHUB_TOKEN", "ghp_test");
+    const reply = await replyAsCos([{ role: "user", content: "welke keys zijn verbonden?" }]);
+    expect(reply.mode).toBe("planner");
+    expect(reply.intent).toBe("status");
+    expect(reply.reply).toContain("GitHub");
+    expect(reply.reply).toContain("✅");
+    expect(reply.reply).toContain("ChatGPT");
+    expect(queryMock).not.toHaveBeenCalled();
+    expect(createMock).not.toHaveBeenCalled();
+    expect(dispatchMock).not.toHaveBeenCalled();
+  });
+
   it("delegates build work to Claude Code on GitHub when configured", async () => {
     isDispatchConfiguredMock.mockReturnValue(true);
     dispatchMock.mockResolvedValue({ number: 7, url: "https://github.com/o/r/issues/7" });
