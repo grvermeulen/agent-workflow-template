@@ -10,6 +10,7 @@ describe("toolStatus.service", () => {
       "SUPABASE_URL",
       "SUPABASE_ANON_KEY",
       "ANTHROPIC_API_KEY",
+      "CURSOR_API_KEY",
       "OPENAI_API_KEY",
     ]) {
       vi.stubEnv(key, "");
@@ -34,6 +35,12 @@ describe("toolStatus.service", () => {
   it("treats local IDE tools as degraded (manual) rather than offline", () => {
     const cursor = getToolStatuses().find((tool) => tool.id === "cursor");
     expect(cursor?.state).toBe("degraded");
+  });
+
+  it("marks Cursor connected when CURSOR_API_KEY is present", () => {
+    vi.stubEnv("CURSOR_API_KEY", "cur_test");
+    const cursor = getToolStatuses().find((tool) => tool.id === "cursor");
+    expect(cursor?.state).toBe("connected");
   });
 
   it("requires all keys for a multi-key integration", () => {

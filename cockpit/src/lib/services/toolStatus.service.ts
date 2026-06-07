@@ -22,7 +22,8 @@ const TOOL_DEFINITIONS: ToolDefinition[] = [
     // Connected via the Claude subscription (OAuth token) OR the Anthropic API key.
     requiresAny: ["CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY"],
   },
-  { id: "cursor", name: "Cursor", category: "build", requires: [], manual: true },
+  // Connected when an API key is set; otherwise shown as a manually-used IDE tool.
+  { id: "cursor", name: "Cursor", category: "build", requires: ["CURSOR_API_KEY"], manual: true },
   { id: "github", name: "GitHub", category: "infra", requires: ["GITHUB_TOKEN"] },
   { id: "vercel", name: "Vercel", category: "infra", requires: ["VERCEL_TOKEN"] },
   {
