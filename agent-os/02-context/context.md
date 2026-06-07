@@ -23,7 +23,8 @@ The user already runs many AI tools and does not want to manage which work happe
 - **Code:** `cockpit/` in this repo — Next.js 15 + Tailwind v4 + TypeScript, service layer, Zod, Vitest. Built from `cockpit-design.md`.
 - **Live:** deployed on Vercel (project `cos`, root directory `cockpit/`) at **https://cos-lemon.vercel.app**. Auto-deploys from `main` via the GitHub integration.
 - **Live data:** with `GITHUB_TOKEN` set, the work board (issues → backlog, PRs → in-progress) and activity feed are live. Other tools light up per their env keys (`.env.example`).
-- **Chat:** the "From The Pit" bar talks to Cos (`claude-opus-4-8`), choosing the brain in order: the user's **Claude subscription** (`CLAUDE_CODE_OAUTH_TOKEN`, via Claude Code headless — preferred, no API billing) → **Anthropic API** (`ANTHROPIC_API_KEY`) → keyword **planner** fallback so it works without any credentials.
+- **Chat:** the "From The Pit" bar (`claude-opus-4-8`). Build/deploy/hire requests are **delegated to Claude Code on GitHub** (subscription, via the `@claude` Action) when `COS_WORK_REPO` + a write token are set. Conversation: headless subscription Claude Code (off-Vercel only) → Anthropic API (chat on Vercel) → keyword planner.
+- **Learned (2026-06-07):** Claude Code's headless subscription path spawns the CLI subprocess, which **does not run in Vercel serverless** (fails fast → falls back). On Vercel: API key for chat + GitHub Action for subscription work. A true subscription chat needs an always-on Node host.
 
 ## Recent decisions
 

@@ -61,24 +61,29 @@ pins the framework).
 
 ## Chat ("From The Pit")
 
-The command bar is a real chat with Cos, using Cos's persona (Chief of Staff; you
-give the "what", Cos owns the "how"; honors the approval gates). It answers through
-the first available of, in order:
+The command bar is a real chat with Cos (Chief of Staff; you give the "what", Cos
+owns the "how"; honors the approval gates). Two things happen:
 
-1. **Your Claude subscription** — set `CLAUDE_CODE_OAUTH_TOKEN` (from
-   `claude setup-token` while signed into your Pro/Max plan). The chat runs Claude
-   Code headlessly via `@anthropic-ai/claude-agent-sdk`, billed to your subscription
-   — **no API usage**.
-2. **The Anthropic API** — `ANTHROPIC_API_KEY` (billed as API usage).
+**Actionable work is delegated to Claude Code on your subscription.** When a message
+is a build/deploy/hire request and `COS_WORK_REPO` + a write-capable `GITHUB_TOKEN`
+are set, Cos opens a GitHub issue mentioning `@claude`. The
+[Claude Code Action](../.github/workflows/claude.yml) then implements it and opens a
+PR — running on your Claude subscription (`CLAUDE_CODE_OAUTH_TOKEN` as a repo
+secret), **no API usage**. The reply is tagged `gedelegeerd` and links the issue.
+
+**Everything else is answered conversationally**, via the first available of:
+
+1. **Your Claude subscription** (`CLAUDE_CODE_OAUTH_TOKEN`) — runs Claude Code
+   headlessly. **Only on a host that can spawn the CLI subprocess** — this is
+   **skipped on Vercel serverless** (it can't), unless `COS_FORCE_CLAUDE_CODE=1`.
+2. **The Anthropic API** (`ANTHROPIC_API_KEY`) — used for chat on Vercel.
 3. **Keyword planner** — no credentials needed, so the chat always works.
 
-Each reply is tagged `Claude` or `planner` in the UI. Endpoint: `POST /api/chat`
-with `{ messages: [{role, content}] }`.
+Replies are tagged `Claude` / `planner` / `gedelegeerd`. Endpoint: `POST /api/chat`.
 
-> **Host note:** the subscription path spawns the Claude Code CLI subprocess. That
-> needs the Node runtime and enough execution time (the route sets `maxDuration = 60`,
-> capped by your Vercel plan — Hobby is 10s). If a host can't run the subprocess, the
-> chat automatically degrades to the API key or planner.
+> **On Vercel:** set `ANTHROPIC_API_KEY` for the chat, and use the GitHub Action +
+> `COS_WORK_REPO` for subscription-powered work. The headless-subscription chat is
+> for self-managed (always-on Node) hosts, where the CLI subprocess can run.
 
 ## Status — v1
 

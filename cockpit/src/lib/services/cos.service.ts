@@ -2,11 +2,15 @@ import Anthropic from "@anthropic-ai/sdk";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { readEnv } from "@/lib/config/env";
 import { logger } from "@/lib/logger";
-import { planCommand } from "@/lib/services/command.service";
+import { detectIntent, planCommand } from "@/lib/services/command.service";
+import { dispatchToClaudeCode, isDispatchConfigured } from "@/lib/services/dispatch.service";
 import type { ChatMessage, ChatReply } from "@/lib/schemas/chat";
 
 /** The model Cos speaks with. */
 const COS_MODEL = "claude-opus-4-8";
+
+/** Intents that represent actionable work to delegate to Claude Code. */
+const DELEGATABLE_INTENTS = new Set(["build", "deploy", "hire"]);
 
 /**
  * Cos's persona and operating rules, injected as the system prompt. Mirrors the
@@ -19,13 +23,12 @@ Je orkestreert werk en delegeert naar de juiste agent of tool: Claude Code en Cu
 
 Gedragsregels:
 - Antwoord kort, helder en in het Nederlands.
-- Voor uitvoerend of muterend werk: beschrijf eerst je plan (de "hoe") en welke agent of tool het oppakt. Voer in deze versie nog niets echt uit — je beschrijft alleen het plan.
-- Respecteer goedkeuringspoorten: nieuwe toegangsrechten en destructieve of externe acties vereisen akkoord van de gebruiker. Vraag erom voordat je voorstelt zoiets uit te voeren.
+- Voor uitvoerend of muterend werk: beschrijf eerst je plan (de "hoe") en welke agent of tool het oppakt.
+- Respecteer goedkeuringspoorten: nieuwe toegangsrechten en destructieve of externe acties vereisen akkoord van de gebruiker.
 - Wees rustig en zakelijk; geen onnodige uitweiding.`;
 
 /**
- * Whether Cos can answer via the user's Claude subscription (a Claude Code OAuth
- * token is configured). This routes through Claude Code instead of API billing.
+ * Whether a Claude subscription token is configured (drives the tool tile).
  *
  * @returns True when `CLAUDE_CODE_OAUTH_TOKEN` is present.
  */
@@ -34,14 +37,27 @@ export function isCosSubscriptionEnabled(): boolean {
 }
 
 /**
- * Whether Cos can answer with a real model — either via the subscription
- * (Claude Code) or the Anthropic API.
+ * Whether Cos can answer with a real model — via the subscription or the API.
  *
  * @returns True when a subscription token or API key is present.
  */
 export function isCosLlmEnabled(): boolean {
   const env = readEnv();
   return Boolean(env.CLAUDE_CODE_OAUTH_TOKEN || env.ANTHROPIC_API_KEY);
+}
+
+/**
+ * Whether the headless Claude Code path can actually run here. It spawns the
+ * Claude Code CLI subprocess, which does not work in Vercel's serverless
+ * sandbox — so it's used only off-Vercel (or when explicitly forced on a host
+ * that supports subprocesses).
+ *
+ * @returns True when the subscription token is set and the host can spawn it.
+ */
+function claudeCodeUsable(): boolean {
+  if (!readEnv().CLAUDE_CODE_OAUTH_TOKEN) return false;
+  if (process.env.COS_FORCE_CLAUDE_CODE === "1") return true;
+  return process.env.VERCEL !== "1";
 }
 
 /**
@@ -97,7 +113,6 @@ function plannerReply(messages: ChatMessage[]): ChatReply {
  * @returns Cos's reply text, or an empty string if nothing was produced.
  */
 async function replyViaClaudeCode(messages: ChatMessage[]): Promise<string> {
-  // Claude Code writes config/state; point it at a writable dir for serverless hosts.
   if (!process.env.CLAUDE_CONFIG_DIR) {
     process.env.CLAUDE_CONFIG_DIR = "/tmp/.claude-cos";
   }
@@ -145,17 +160,36 @@ async function replyViaApi(messages: ChatMessage[], apiKey: string): Promise<str
 }
 
 /**
- * Produces Cos's reply to a chat turn. Preference order, each degrading to the
- * next on absence or error: the user's Claude subscription (Claude Code) →
- * the Anthropic API → the keyword planner. The chat therefore always works.
+ * Produces Cos's reply to a chat turn.
+ *
+ * Actionable build/deploy/hire requests are **delegated** to Claude Code on
+ * GitHub (running on the user's subscription) when delegation is configured.
+ * Everything else is answered conversationally, preferring (when the host can
+ * run it) the subscription, then the Anthropic API, then the keyword planner —
+ * each degrading on absence or error, so the chat always works.
  *
  * @param messages - The full conversation history (user/assistant turns).
  * @returns Cos's reply and how it was produced.
  */
 export async function replyAsCos(messages: ChatMessage[]): Promise<ChatReply> {
-  const { CLAUDE_CODE_OAUTH_TOKEN, ANTHROPIC_API_KEY } = readEnv();
+  const { ANTHROPIC_API_KEY } = readEnv();
+  const text = lastUserText(messages);
+  const intent = detectIntent(text);
 
-  if (CLAUDE_CODE_OAUTH_TOKEN) {
+  if (DELEGATABLE_INTENTS.has(intent) && isDispatchConfigured()) {
+    const issue = await dispatchToClaudeCode(text);
+    if (issue) {
+      return {
+        reply: `Ingepland als werk: issue #${issue.number}. Claude Code pakt het op via je abonnement en opent een pull request.`,
+        mode: "delegated",
+        intent,
+        assignedTo: "Claude Code (GitHub)",
+        url: issue.url,
+      };
+    }
+  }
+
+  if (claudeCodeUsable()) {
     try {
       const reply = await replyViaClaudeCode(messages);
       if (reply) return { reply, mode: "llm" };

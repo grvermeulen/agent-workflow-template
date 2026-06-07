@@ -3,7 +3,13 @@
 import { useRef, useState } from "react";
 import { chatReplySchema, type ChatMessage, type ChatReply } from "@/lib/schemas/chat";
 
-type Turn = ChatMessage & { mode?: ChatReply["mode"] };
+type Turn = ChatMessage & { mode?: ChatReply["mode"]; url?: string };
+
+const MODE_LABEL: Record<NonNullable<ChatReply["mode"]>, string> = {
+  llm: "Claude",
+  planner: "planner",
+  delegated: "gedelegeerd",
+};
 
 /**
  * The "From The Pit" chat. Sends the conversation to Cos and renders the replies.
@@ -60,7 +66,7 @@ export function CommandInput(): React.ReactElement {
       const data = parsed.data;
       setTurns((current) => [
         ...current,
-        { role: "assistant", content: data.reply, mode: data.mode },
+        { role: "assistant", content: data.reply, mode: data.mode, url: data.url },
       ]);
       requestAnimationFrame(() => {
         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -91,10 +97,20 @@ export function CommandInput(): React.ReactElement {
               >
                 {turn.role === "assistant" ? (
                   <p className="mb-1 text-[10px] uppercase tracking-wide text-muted">
-                    Cos {turn.mode === "planner" ? "· planner" : "· Claude"}
+                    Cos {turn.mode ? `· ${MODE_LABEL[turn.mode]}` : ""}
                   </p>
                 ) : null}
                 <p className="whitespace-pre-wrap">{turn.content}</p>
+                {turn.url ? (
+                  <a
+                    href={turn.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-block text-[11px] text-accent hover:underline"
+                  >
+                    Bekijk het issue →
+                  </a>
+                ) : null}
               </div>
             </div>
           ))}
