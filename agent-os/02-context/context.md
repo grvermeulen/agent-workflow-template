@@ -16,20 +16,21 @@ The user already runs many AI tools and does not want to manage which work happe
 
 ## Active priorities
 
-1. **Cockpit v1 is live** ("The Pit") — see below. Next: move the chat from dry-run plans to real execution; wire the non-GitHub tools for real.
+1. **Cockpit v1 is live** ("The Pit") — see below. Build/deploy/hire requests now **delegate to Claude Code on GitHub**. Next: wire the non-GitHub tools for real, and an always-on host for interactive subscription chat.
 
 ## Cockpit ("The Pit") — v1 live
 
 - **Code:** `cockpit/` in this repo — Next.js 15 + Tailwind v4 + TypeScript, service layer, Zod, Vitest. Built from `cockpit-design.md`.
 - **Live:** deployed on Vercel (project `cos`, root directory `cockpit/`) at **https://cos-lemon.vercel.app**. Auto-deploys from `main` via the GitHub integration.
 - **Live data:** with `GITHUB_TOKEN` set, the work board (issues → backlog, PRs → in-progress) and activity feed are live. Other tools light up per their env keys (`.env.example`).
-- **Chat:** the "From The Pit" bar talks to Cos (`claude-opus-4-8`), choosing the brain in order: the user's **Claude subscription** (`CLAUDE_CODE_OAUTH_TOKEN`, via Claude Code headless — preferred, no API billing) → **Anthropic API** (`ANTHROPIC_API_KEY`) → keyword **planner** fallback so it works without any credentials.
+- **Chat:** the "From The Pit" bar (`claude-opus-4-8`). Build/deploy/hire requests are **delegated to Claude Code on GitHub** (subscription, via the `@claude` Action) when `COS_WORK_REPO` + a write token are set. Conversation: headless subscription Claude Code (off-Vercel only) → Anthropic API (chat on Vercel) → keyword planner.
+- **Learned (2026-06-07):** Claude Code's headless subscription path spawns the CLI subprocess, which **does not run in Vercel serverless** (fails fast → falls back). On Vercel: API key for chat + GitHub Action for subscription work. A true subscription chat needs an always-on Node host.
 
 ## Recent decisions
 
 - Identity defined: the chief-of-staff agent is **Cos** — orchestrates, hires/creates agents, owns access rights, maintains a cockpit app (see `01-identity/identity.md`).
 - Built and shipped **Cos v1 / The Pit** to Vercel (2026-06-07). Cockpit lives in `cockpit/` (kept out of the template root; can be extracted to its own repo later).
-- Cockpit chat backed by Claude with a graceful planner fallback; in v1 the chat returns plans (the "hoe") and does not yet execute mutating work.
+- Cockpit chat backed by Claude with a graceful planner fallback. Build/deploy/hire requests are **delegated to Claude Code on GitHub** (it opens an `@claude` issue → the Action implements it on the subscription); conversational turns are answered by the API (on Vercel) or planner.
 
 ## External authorities
 
@@ -40,6 +41,7 @@ The user already runs many AI tools and does not want to manage which work happe
 
 ## Open questions
 
-- The cockpit chat states plans but does not yet execute them — turning a plan into a real GitHub issue + agent assignment is the next step.
+- Build/deploy/hire requests delegate to Claude Code on GitHub (issue → `@claude`), but other intents only return a conversational reply — broader execution is still to come.
+- Interactive subscription chat needs an always-on Node host (the headless Claude Code subprocess can't run in Vercel serverless).
 - How Cos reaches across non-Claude tools (ChatGPT, Gemini, xAI, ElevenLabs) operationally is not yet defined (only Claude is wired so far).
 - Voice (ElevenLabs) is not yet built; the cockpit is chat-only for now.

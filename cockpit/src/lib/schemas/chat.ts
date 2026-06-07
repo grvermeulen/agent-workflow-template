@@ -19,17 +19,22 @@ export const chatRequestSchema = z.object({
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 
 /** How Cos produced the reply. */
-export const chatModeSchema = z.enum(["llm", "planner"]);
+export const chatModeSchema = z.enum(["llm", "planner", "delegated"]);
 export type ChatMode = z.infer<typeof chatModeSchema>;
 
 /** Cos's reply to a chat turn. */
 export const chatReplySchema = z.object({
   reply: z.string(),
-  /** "llm" = answered by Claude; "planner" = keyword fallback (no API key). */
+  /**
+   * "llm" = answered by Claude (API); "planner" = keyword fallback;
+   * "delegated" = handed to Claude Code on GitHub (subscription).
+   */
   mode: chatModeSchema,
-  /** Present in planner mode: the detected intent. */
+  /** Present in planner/delegated mode: the detected intent. */
   intent: commandIntentSchema.optional(),
-  /** Present in planner mode: the agent/tool Cos would assign. */
+  /** Present in planner/delegated mode: the agent/tool Cos would assign. */
   assignedTo: z.string().optional(),
+  /** Present in delegated mode: the URL of the GitHub work issue. */
+  url: z.string().url().optional(),
 });
 export type ChatReply = z.infer<typeof chatReplySchema>;

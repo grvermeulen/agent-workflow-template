@@ -7,6 +7,11 @@ import { z } from "zod";
 const envSchema = z.object({
   GITHUB_TOKEN: z.string().optional(),
   GITHUB_OWNER: z.string().optional(),
+  /** "owner/repo" where Cos opens @claude work issues (delegation target). */
+  COS_WORK_REPO: z
+    .string()
+    .regex(/^[^/\s]+\/[^/\s]+$/, "COS_WORK_REPO moet het formaat 'owner/repo' hebben")
+    .optional(),
   VERCEL_TOKEN: z.string().optional(),
   SUPABASE_URL: z.string().optional(),
   SUPABASE_ANON_KEY: z.string().optional(),
