@@ -41,11 +41,13 @@ describe("cos.service", () => {
     expect(isCosSubscriptionEnabled()).toBe(false);
   });
 
-  it("answers in planner mode using the last user message", async () => {
+  it("explains delegation isn't configured for build work without COS_WORK_REPO", async () => {
     const reply = await replyAsCos([{ role: "user", content: "Bouw een dashboard" }]);
-    expect(reply.mode).toBe("planner");
     expect(reply.intent).toBe("build");
-    expect(reply.assignedTo).toContain("Bouwer");
+    expect(reply.mode).toBe("planner");
+    expect(reply.reply).toContain("COS_WORK_REPO");
+    expect(dispatchMock).not.toHaveBeenCalled();
+    expect(queryMock).not.toHaveBeenCalled();
   });
 
   it("answers via the Claude subscription off-Vercel when a token is set", async () => {

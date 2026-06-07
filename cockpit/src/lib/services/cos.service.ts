@@ -227,7 +227,17 @@ export async function replyAsCos(messages: ChatMessage[]): Promise<ChatReply> {
     return statusReply();
   }
 
-  if (DELEGATABLE_INTENTS.has(intent) && isDispatchConfigured()) {
+  // Actionable work is delegated to Claude Code on GitHub. Be explicit about why
+  // an issue is or isn't created — never silently fall back to a chat reply.
+  if (DELEGATABLE_INTENTS.has(intent)) {
+    if (!isDispatchConfigured()) {
+      return {
+        reply: `Dit kan ik delegeren aan Claude Code op GitHub, maar delegatie is nog niet ingesteld. Zet \`COS_WORK_REPO\` (owner/repo) in de Vercel-omgevingsvariabelen en geef \`GITHUB_TOKEN\` \`issues:write\`-rechten — daarna open ik automatisch een @claude-issue.`,
+        mode: "planner",
+        intent,
+        assignedTo: "Cos",
+      };
+    }
     const issue = await dispatchToClaudeCode(text);
     if (issue) {
       return {
@@ -238,6 +248,12 @@ export async function replyAsCos(messages: ChatMessage[]): Promise<ChatReply> {
         url: issue.url,
       };
     }
+    return {
+      reply: `Ik wilde een @claude-issue aanmaken in \`COS_WORK_REPO\`, maar dat lukte niet. Controleer of de repo bestaat en of \`GITHUB_TOKEN\` \`issues:write\`-rechten heeft.`,
+      mode: "planner",
+      intent,
+      assignedTo: "Cos",
+    };
   }
 
   if (claudeCodeUsable()) {
