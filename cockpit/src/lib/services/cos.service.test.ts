@@ -80,7 +80,8 @@ describe("cos.service", () => {
 
     const reply = await replyAsCos([{ role: "user", content: "Bouw een landingspagina" }]);
 
-    expect(dispatchMock).toHaveBeenCalledOnce();
+    expect(dispatchMock).toHaveBeenCalledTimes(1);
+    expect(dispatchMock).toHaveBeenCalledWith("Bouw een landingspagina");
     expect(queryMock).not.toHaveBeenCalled();
     expect(createMock).not.toHaveBeenCalled();
     expect(reply.mode).toBe("delegated");

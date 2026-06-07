@@ -16,7 +16,7 @@ The user already runs many AI tools and does not want to manage which work happe
 
 ## Active priorities
 
-1. **Cockpit v1 is live** ("The Pit") — see below. Next: move the chat from dry-run plans to real execution; wire the non-GitHub tools for real.
+1. **Cockpit v1 is live** ("The Pit") — see below. Build/deploy/hire requests now **delegate to Claude Code on GitHub**. Next: wire the non-GitHub tools for real, and an always-on host for interactive subscription chat.
 
 ## Cockpit ("The Pit") — v1 live
 
@@ -30,7 +30,7 @@ The user already runs many AI tools and does not want to manage which work happe
 
 - Identity defined: the chief-of-staff agent is **Cos** — orchestrates, hires/creates agents, owns access rights, maintains a cockpit app (see `01-identity/identity.md`).
 - Built and shipped **Cos v1 / The Pit** to Vercel (2026-06-07). Cockpit lives in `cockpit/` (kept out of the template root; can be extracted to its own repo later).
-- Cockpit chat backed by Claude with a graceful planner fallback; in v1 the chat returns plans (the "hoe") and does not yet execute mutating work.
+- Cockpit chat backed by Claude with a graceful planner fallback. Build/deploy/hire requests are **delegated to Claude Code on GitHub** (it opens an `@claude` issue → the Action implements it on the subscription); conversational turns are answered by the API (on Vercel) or planner.
 
 ## External authorities
 
@@ -41,6 +41,7 @@ The user already runs many AI tools and does not want to manage which work happe
 
 ## Open questions
 
-- The cockpit chat states plans but does not yet execute them — turning a plan into a real GitHub issue + agent assignment is the next step.
+- Build/deploy/hire requests delegate to Claude Code on GitHub (issue → `@claude`), but other intents only return a conversational reply — broader execution is still to come.
+- Interactive subscription chat needs an always-on Node host (the headless Claude Code subprocess can't run in Vercel serverless).
 - How Cos reaches across non-Claude tools (ChatGPT, Gemini, xAI, ElevenLabs) operationally is not yet defined (only Claude is wired so far).
 - Voice (ElevenLabs) is not yet built; the cockpit is chat-only for now.

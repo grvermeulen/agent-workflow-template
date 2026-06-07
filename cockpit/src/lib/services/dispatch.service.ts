@@ -40,6 +40,8 @@ export async function dispatchToClaudeCode(text: string): Promise<DispatchResult
   const { COS_WORK_REPO, GITHUB_TOKEN } = readEnv();
   if (!COS_WORK_REPO || !GITHUB_TOKEN) return null;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
   try {
     const body = `${text}\n\n---\n@claude implementeer dit en open een pull request. Volg de projectconventies (zie \`CLAUDE.md\`).\n\n_Aangemaakt door Cos via The Pit._`;
     const response = await fetch(`${GITHUB_API}/repos/${COS_WORK_REPO}/issues`, {
@@ -51,6 +53,7 @@ export async function dispatchToClaudeCode(text: string): Promise<DispatchResult
         "Content-Type": "application/json",
       },
       cache: "no-store",
+      signal: controller.signal,
       body: JSON.stringify({ title: titleFrom(text), body }),
     });
     if (!response.ok) {
@@ -61,5 +64,7 @@ export async function dispatchToClaudeCode(text: string): Promise<DispatchResult
   } catch (error: unknown) {
     logger.error("dispatch.dispatchToClaudeCode", error);
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }

@@ -42,8 +42,8 @@ export function isCosSubscriptionEnabled(): boolean {
  * @returns True when a subscription token or API key is present.
  */
 export function isCosLlmEnabled(): boolean {
-  const env = readEnv();
-  return Boolean(env.CLAUDE_CODE_OAUTH_TOKEN || env.ANTHROPIC_API_KEY);
+  // Match runtime: the subscription path only counts where it can actually run.
+  return Boolean(readEnv().ANTHROPIC_API_KEY || claudeCodeUsable());
 }
 
 /**
