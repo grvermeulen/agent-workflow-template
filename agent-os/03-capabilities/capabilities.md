@@ -38,7 +38,8 @@ Format: `<name>` — <description> · <scope> · <trust>
 
 - **Delegate** — assign work to sub-agents (via `Agent`) or to the right tool.
 - **Hire / create agents** — formulate requirements and create a specialized agent on demand, or stand up an **HR agent** to do the hiring.
-- **Cockpit app** — build and maintain the board (backlog / in-progress / done) + agent roster + access rights, backed by GitHub.
+- **Cockpit app** — **live** at `cos-lemon.vercel.app` (code in `cockpit/`): board (backlog / in-progress / done) + agent roster + access rights + activity, backed by GitHub.
+- **Chat (The Pit)** — converse with Cos via the cockpit; backed by Claude `claude-opus-4-8` when `ANTHROPIC_API_KEY` is set, with a keyword-planner fallback. v1 returns plans (the "hoe"); execution is not yet wired.
 - **Grant access rights** — sole grantor; new permission → ask user → record approved → grant onward as fit.
 
 ## Cross-tool reach (not yet wired)

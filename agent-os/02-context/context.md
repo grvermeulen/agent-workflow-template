@@ -1,6 +1,6 @@
 # Context — Index
 
-_Last updated: 2026-06-06_
+_Last updated: 2026-06-07_
 
 ## Mission
 
@@ -16,11 +16,20 @@ The user already runs many AI tools and does not want to manage which work happe
 
 ## Active priorities
 
-1. **Build the cockpit app** — the chat/voice interface plus the board showing backlog / in-progress / done and the agent roster with their purpose and access rights. This is the current top priority. Early design idea ("The Pit") captured in `cockpit-design.md` — use it as the starting reference.
+1. **Cockpit v1 is live** ("The Pit") — see below. Next: move the chat from dry-run plans to real execution; wire the non-GitHub tools for real.
+
+## Cockpit ("The Pit") — v1 live
+
+- **Code:** `cockpit/` in this repo — Next.js 15 + Tailwind v4 + TypeScript, service layer, Zod, Vitest. Built from `cockpit-design.md`.
+- **Live:** deployed on Vercel (project `cos`, root directory `cockpit/`) at **https://cos-lemon.vercel.app**. Auto-deploys from `main` via the GitHub integration.
+- **Live data:** with `GITHUB_TOKEN` set, the work board (issues → backlog, PRs → in-progress) and activity feed are live. Other tools light up per their env keys (`.env.example`).
+- **Chat:** the "From The Pit" bar talks to Cos via Claude (`claude-opus-4-8`) when `ANTHROPIC_API_KEY` is set, with a keyword-planner fallback so it works without a key.
 
 ## Recent decisions
 
 - Identity defined: the chief-of-staff agent is **Cos** — orchestrates, hires/creates agents, owns access rights, maintains a cockpit app (see `01-identity/identity.md`).
+- Built and shipped **Cos v1 / The Pit** to Vercel (2026-06-07). Cockpit lives in `cockpit/` (kept out of the template root; can be extracted to its own repo later).
+- Cockpit chat backed by Claude with a graceful planner fallback; in v1 the chat returns plans (the "hoe") and does not yet execute mutating work.
 
 ## External authorities
 
@@ -31,5 +40,6 @@ The user already runs many AI tools and does not want to manage which work happe
 
 ## Open questions
 
-- The cockpit app does not exist yet; its shape and host are undecided (it reads from GitHub).
-- How Cos reaches across non-Claude tools (ChatGPT, Gemini, xAI, ElevenLabs) operationally is not yet defined.
+- The cockpit chat states plans but does not yet execute them — turning a plan into a real GitHub issue + agent assignment is the next step.
+- How Cos reaches across non-Claude tools (ChatGPT, Gemini, xAI, ElevenLabs) operationally is not yet defined (only Claude is wired so far).
+- Voice (ElevenLabs) is not yet built; the cockpit is chat-only for now.

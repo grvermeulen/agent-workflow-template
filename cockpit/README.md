@@ -59,9 +59,18 @@ Set the project **root directory** to `cockpit/` and add the env vars above in t
 Vercel dashboard. Framework preset: Next.js. No extra config needed (`vercel.json`
 pins the framework).
 
+## Chat ("From The Pit")
+
+The command bar is a real chat with Cos. With `ANTHROPIC_API_KEY` set, it answers via
+Claude (`claude-opus-4-8`) using Cos's persona (Chief of Staff; you give the "what",
+Cos owns the "how"; honors the approval gates). Without a key it falls back to a
+keyword **planner** so the chat still works — every reply is tagged `Claude` or
+`planner` in the UI. Endpoint: `POST /api/chat` with `{ messages: [{role, content}] }`.
+
 ## Status — v1
 
-Live: the full dashboard UI, tool-status detection from env, the GitHub-backed work
-board + activity feed, and the command bar (returns a **dry-run plan** — Cos states
-the "how" before any mutating action, per the human-in-the-loop gates). Executing
-plans, hiring agents for real, and wiring the non-GitHub tools are the next steps.
+Live at **https://cos-lemon.vercel.app**: the full dashboard UI, tool-status detection
+from env, the GitHub-backed work board + activity feed, and the Cos chat. In v1 the
+chat states **plans** (the "how") rather than executing mutating work. Executing plans
+(create the issue, assign the agent), hiring agents for real, and wiring the non-GitHub
+tools are the next steps.
