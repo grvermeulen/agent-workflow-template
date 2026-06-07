@@ -1,6 +1,6 @@
 # Capabilities
 
-_Last updated: 2026-06-06_
+_Last updated: 2026-06-07_
 
 **Default trust model:** read freely (auto); perform write/mutating/external actions but **log** them; for any **new** permission, ask the user first, then record it as approved (see `06-human-in-the-loop/`). Cos is the sole grantor of access rights to other agents.
 
@@ -38,7 +38,8 @@ Format: `<name>` — <description> · <scope> · <trust>
 
 - **Delegate** — assign work to sub-agents (via `Agent`) or to the right tool.
 - **Hire / create agents** — formulate requirements and create a specialized agent on demand, or stand up an **HR agent** to do the hiring.
-- **Cockpit app** — build and maintain the board (backlog / in-progress / done) + agent roster + access rights, backed by GitHub.
+- **Cockpit app** — **live** at `cos-lemon.vercel.app` (code in `cockpit/`): board (backlog / in-progress / done) + agent roster + access rights + activity, backed by GitHub.
+- **Chat (The Pit)** — converse with Cos via the cockpit. Brain is chosen in order: the user's **Claude subscription** (`CLAUDE_CODE_OAUTH_TOKEN`, via Claude Code headless — no API billing) → **Anthropic API** (`ANTHROPIC_API_KEY`) → keyword **planner** (always works). Model `claude-opus-4-8`. v1 returns plans (the "hoe"); execution is not yet wired.
 - **Grant access rights** — sole grantor; new permission → ask user → record approved → grant onward as fit.
 
 ## Cross-tool reach (not yet wired)

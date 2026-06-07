@@ -7,12 +7,21 @@ type ToolDefinition = {
   category: ToolCategory;
   /** Env keys that must all be present for the tool to be "connected". */
   requires: (keyof Env)[];
+  /** Any one of these env keys being present marks the tool "connected". */
+  requiresAny?: (keyof Env)[];
   /** Local/IDE tool with no API credential — shown as degraded ("manual") when unmet. */
   manual?: boolean;
 };
 
 const TOOL_DEFINITIONS: ToolDefinition[] = [
-  { id: "claude-code", name: "Claude Code", category: "build", requires: ["ANTHROPIC_API_KEY"] },
+  {
+    id: "claude-code",
+    name: "Claude Code",
+    category: "build",
+    requires: [],
+    // Connected via the Claude subscription (OAuth token) OR the Anthropic API key.
+    requiresAny: ["CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY"],
+  },
   { id: "cursor", name: "Cursor", category: "build", requires: [], manual: true },
   { id: "github", name: "GitHub", category: "infra", requires: ["GITHUB_TOKEN"] },
   { id: "vercel", name: "Vercel", category: "infra", requires: ["VERCEL_TOKEN"] },
@@ -37,7 +46,9 @@ const TOOL_DEFINITIONS: ToolDefinition[] = [
  * @returns The resolved tool status.
  */
 function resolveTool(definition: ToolDefinition): ToolStatus {
-  const configured = definition.requires.length > 0 && hasEnv(...definition.requires);
+  const configured =
+    (definition.requires.length > 0 && hasEnv(...definition.requires)) ||
+    Boolean(definition.requiresAny?.some((key) => hasEnv(key)));
 
   if (configured) {
     return {

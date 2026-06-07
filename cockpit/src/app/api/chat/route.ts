@@ -1,0 +1,43 @@
+import { NextResponse } from "next/server";
+import { chatRequestSchema } from "@/lib/schemas/chat";
+import { replyAsCos } from "@/lib/services/cos.service";
+import { logger } from "@/lib/logger";
+
+// The subscription path spawns the Claude Code CLI subprocess — needs the Node
+// runtime and room to run (Vercel caps maxDuration by plan; Hobby is 10s).
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
+/**
+ * POST /api/chat — Cos replies to a "From The Pit" conversation. Uses Claude when
+ * configured, otherwise the keyword planner (see `cos.service`).
+ *
+ * @param request - The incoming request with a JSON `{ messages }` body.
+ * @returns Cos's reply, or a 400/500 error.
+ */
+export async function POST(request: Request): Promise<Response> {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Ongeldige JSON: controleer de request body" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const parsed = chatRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "Ongeldige opdracht" },
+        { status: 400 },
+      );
+    }
+    const reply = await replyAsCos(parsed.data.messages);
+    return NextResponse.json(reply);
+  } catch (error: unknown) {
+    logger.error("api.chat", error);
+    return NextResponse.json({ error: "Interne fout" }, { status: 500 });
+  }
+}
