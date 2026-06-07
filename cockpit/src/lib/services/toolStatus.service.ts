@@ -35,7 +35,13 @@ const TOOL_DEFINITIONS: ToolDefinition[] = [
   { id: "slack", name: "Slack", category: "comms", requires: ["SLACK_BOT_TOKEN"] },
   { id: "atlassian", name: "Atlassian", category: "comms", requires: ["ATLASSIAN_API_TOKEN"] },
   { id: "chatgpt", name: "ChatGPT", category: "model", requires: ["OPENAI_API_KEY"] },
-  { id: "gemini", name: "Gemini", category: "model", requires: ["GEMINI_API_KEY"] },
+  {
+    id: "gemini",
+    name: "Gemini",
+    category: "model",
+    requires: [],
+    requiresAny: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
+  },
   { id: "xai", name: "xAI", category: "model", requires: ["XAI_API_KEY"] },
   { id: "elevenlabs", name: "ElevenLabs", category: "model", requires: ["ELEVENLABS_API_KEY"] },
 ];

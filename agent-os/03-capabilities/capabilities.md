@@ -40,6 +40,7 @@ Format: `<name>` — <description> · <scope> · <trust>
 - **Hire / create agents** — formulate requirements and create a specialized agent on demand, or stand up an **HR agent** to do the hiring.
 - **Cockpit app** — **live** at `cos-lemon.vercel.app` (code in `cockpit/`): board (backlog / in-progress / done) + agent roster + access rights + activity, backed by GitHub.
 - **Chat (The Pit)** — converse with Cos. **Actionable build/deploy/hire requests are delegated to Claude Code on GitHub**: Cos opens an `@claude` issue and the Claude Code Action (`.github/workflows/claude.yml`) implements it and opens a PR, running on the **subscription** (`CLAUDE_CODE_OAUTH_TOKEN` secret, no API billing) — needs `COS_WORK_REPO` + a write `GITHUB_TOKEN`. Conversation uses, in order: headless subscription Claude Code (**off-Vercel only** — the CLI subprocess can't run in Vercel serverless) → **Anthropic API** (`ANTHROPIC_API_KEY`, used for chat on Vercel) → keyword **planner**. Model `claude-opus-4-8`.
+- **Report tool/key status** — Cos answers "which tools/keys are connected?" directly from the cockpit's own environment (✅/⚠️/❌ checklist, key **names** only — never values). Gemini accepts `GEMINI_API_KEY` or `GOOGLE_API_KEY`.
 - **Delegate to Claude Code (GitHub Action)** — `@claude` on any issue/PR runs Claude Code on the subscription and opens a PR. The sanctioned way to spend the subscription on real work, with no serverless time/subprocess limits.
 - **Grant access rights** — sole grantor; new permission → ask user → record approved → grant onward as fit.
 
