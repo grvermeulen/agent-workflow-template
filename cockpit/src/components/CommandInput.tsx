@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { ChatMessage, ChatReply } from "@/lib/schemas/chat";
+import { chatReplySchema, type ChatMessage, type ChatReply } from "@/lib/schemas/chat";
 
 type Turn = ChatMessage & { mode?: ChatReply["mode"] };
 
@@ -51,7 +51,13 @@ export function CommandInput(): React.ReactElement {
         setError(message);
         return;
       }
-      const data = (await response.json()) as ChatReply;
+      const json: unknown = await response.json();
+      const parsed = chatReplySchema.safeParse(json);
+      if (!parsed.success) {
+        setError("Onverwacht antwoord van Cos");
+        return;
+      }
+      const data = parsed.data;
       setTurns((current) => [
         ...current,
         { role: "assistant", content: data.reply, mode: data.mode },
@@ -59,7 +65,8 @@ export function CommandInput(): React.ReactElement {
       requestAnimationFrame(() => {
         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
       });
-    } catch {
+    } catch (error: unknown) {
+      console.error("[the-pit] chat", error);
       setError("Kon Cos niet bereiken");
     } finally {
       setLoading(false);

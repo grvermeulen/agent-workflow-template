@@ -8,7 +8,7 @@ export type ChatRole = z.infer<typeof chatRoleSchema>;
 /** A single message in a Cos conversation. */
 export const chatMessageSchema = z.object({
   role: chatRoleSchema,
-  content: z.string().min(1),
+  content: z.string().trim().min(1, "Voer een bericht in").max(4000, "Bericht is te lang"),
 });
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 

@@ -11,8 +11,17 @@ import { logger } from "@/lib/logger";
  * @returns Cos's reply, or a 400/500 error.
  */
 export async function POST(request: Request): Promise<Response> {
+  let body: unknown;
   try {
-    const body: unknown = await request.json();
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Ongeldige JSON: controleer de request body" },
+      { status: 400 },
+    );
+  }
+
+  try {
     const parsed = chatRequestSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(

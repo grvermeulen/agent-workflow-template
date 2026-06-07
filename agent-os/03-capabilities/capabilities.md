@@ -1,6 +1,6 @@
 # Capabilities
 
-_Last updated: 2026-06-06_
+_Last updated: 2026-06-07_
 
 **Default trust model:** read freely (auto); perform write/mutating/external actions but **log** them; for any **new** permission, ask the user first, then record it as approved (see `06-human-in-the-loop/`). Cos is the sole grantor of access rights to other agents.
 
