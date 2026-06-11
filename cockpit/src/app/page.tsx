@@ -8,7 +8,7 @@ import { WorkBoard } from "@/components/WorkBoard";
 import { QuickLaunch } from "@/components/QuickLaunch";
 import { Automations } from "@/components/Automations";
 import { ToDoList } from "@/components/ToDoList";
-import { CommandInput } from "@/components/CommandInput";
+import { PitConsole } from "@/components/PitConsole";
 import { getToolStatuses, getConnectedCount } from "@/lib/services/toolStatus.service";
 import { getAgents } from "@/lib/services/agents.service";
 import { getBoard } from "@/lib/services/work.service";
@@ -80,7 +80,7 @@ export default async function CockpitPage(): Promise<React.ReactElement> {
         </div>
 
         <div className="mt-5">
-          <CommandInput />
+          <PitConsole />
         </div>
       </main>
     </div>

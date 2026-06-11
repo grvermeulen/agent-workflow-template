@@ -1,0 +1,15 @@
+{
+  "name": "cos-pit-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Electron desktop shell for The Pit. Boots the Next.js cockpit and exposes a real PTY (running claude). Kept out of the cockpit's package.json so Vercel never installs Electron.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js"
+  },
+  "dependencies": {
+    "electron": "^33.2.1",
+    "node-pty": "^1.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "cos-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local terminal bridge for The Pit — exposes a PTY (running claude) over an authenticated WebSocket so the Vercel-hosted cockpit can reach this machine.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "token": "node token.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "node-pty": "^1.0.0",
+    "ws": "^8.18.0"
+  }
+}
